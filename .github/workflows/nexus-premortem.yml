@@ -1,0 +1,26 @@
+# Pre-commit nudge: when a PR touches design docs / ADRs, ask NEXUS for a premortem and post it as a comment.
+# Repo secrets: NEXUS_API_URL (e.g. https://nexus-api.onrender.com), NEXUS_TEAM (e.g. payments)
+name: NEXUS premortem
+on:
+  pull_request:
+    paths: ["docs/adr/**", "docs/design/**", "rfcs/**"]
+permissions:
+  pull-requests: write
+jobs:
+  premortem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask NEXUS
+        id: nexus
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          jq -n --arg team "${{ secrets.NEXUS_TEAM }}" --arg title "$TITLE" --arg body "$BODY" \
+            '{team:$team,title:$title,body:$body}' > req.json
+          curl -sf -X POST "${{ secrets.NEXUS_API_URL }}/integrations/github/pr" \
+            -H 'Content-Type: application/json' -d @req.json | jq -r .comment_markdown > comment.md
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body-file comment.md

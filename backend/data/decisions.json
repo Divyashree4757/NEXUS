@@ -1,0 +1,1074 @@
+[
+  {
+    "id": "D-0101",
+    "team": "payments",
+    "proposed_at": "2025-01-13",
+    "closed_at": "2025-03-21",
+    "title": "Migrate ledger-service from MySQL 5.7 to PostgreSQL 15",
+    "category": "migration",
+    "owner": "Rohan Mehta",
+    "services": [
+      "ledger-service"
+    ],
+    "project": "Ledger modernisation",
+    "team_size": 4,
+    "estimate_weeks": 3,
+    "actual_weeks": 7,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "No schema changes needed; ORM abstracts the dialect",
+        "held": false,
+        "note": "JSON columns and ENUMs needed rewrites; 41 migrations hand-edited"
+      },
+      {
+        "text": "Dual-write window of one week is enough",
+        "held": false,
+        "note": "Reconciliation found drift for 19 days"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "No tested rollback path if dual-writes diverge",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "Shipped 4 weeks late. Divergence during dual-write caused a 2-hour ledger freeze.",
+    "linked_incidents": [
+      "INC-0201"
+    ]
+  },
+  {
+    "id": "D-0102",
+    "team": "payments",
+    "proposed_at": "2025-02-03",
+    "closed_at": "2025-02-28",
+    "title": "Redesign checkout payment-method picker",
+    "category": "frontend",
+    "owner": "Sneha Kulkarni",
+    "services": [
+      "checkout-web"
+    ],
+    "project": "Checkout experience",
+    "team_size": 2,
+    "estimate_weeks": 3,
+    "actual_weeks": 3.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Design system has the needed components",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Arjun Nair",
+        "text": "Accessibility review needed for card input",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "Shipped on time-ish; conversion +1.8% in A/B test.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0103",
+    "team": "payments",
+    "proposed_at": "2025-02-17",
+    "closed_at": "2025-05-02",
+    "title": "Move refund-worker from cron to SQS consumers",
+    "category": "infra",
+    "owner": "Karthik Subramanian",
+    "services": [
+      "refund-worker"
+    ],
+    "project": "Event-driven payments",
+    "team_size": 3,
+    "estimate_weeks": 4,
+    "actual_weeks": 9,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Refund jobs are idempotent",
+        "held": false,
+        "note": "Duplicate refunds issued for retried messages"
+      },
+      {
+        "text": "Existing IAM roles cover SQS access",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "Need a rollback switch back to cron during cutover",
+        "addressed": false,
+        "materialized": true
+      },
+      {
+        "raised_by": "Arjun Nair",
+        "text": "Message retries could double-refund",
+        "addressed": true,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "5 weeks over. 37 duplicate refunds (INR 4.1L) before an idempotency key was added.",
+    "linked_incidents": [
+      "INC-0202"
+    ]
+  },
+  {
+    "id": "D-0104",
+    "team": "payments",
+    "proposed_at": "2025-03-10",
+    "closed_at": "2025-04-18",
+    "title": "Integrate Razorpay as secondary acquirer",
+    "category": "feature",
+    "owner": "Arjun Nair",
+    "services": [
+      "payment-gateway"
+    ],
+    "project": "Acquirer integrations",
+    "team_size": 3,
+    "estimate_weeks": 4,
+    "actual_weeks": 5.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Vendor API is stable and matches the docs",
+        "held": false,
+        "note": "Webhook payload format changed mid-integration"
+      },
+      {
+        "text": "Sandbox behaves like production",
+        "held": false,
+        "note": "Production 3DS flow differed"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Rohan Mehta",
+        "text": "Vendor webhooks may arrive out of order",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "1.5 weeks over, driven by undocumented vendor behaviour.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0105",
+    "team": "payments",
+    "proposed_at": "2025-04-07",
+    "closed_at": "2025-05-09",
+    "title": "Add saved-cards management page",
+    "category": "frontend",
+    "owner": "Sneha Kulkarni",
+    "services": [
+      "checkout-web"
+    ],
+    "project": "Checkout experience",
+    "team_size": 2,
+    "estimate_weeks": 4,
+    "actual_weeks": 4.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Tokenisation API supports listing cards",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "Shipped close to plan.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0106",
+    "team": "payments",
+    "proposed_at": "2025-05-05",
+    "closed_at": "2025-07-25",
+    "title": "Split payment-gateway monolith: extract fraud-scorer",
+    "category": "migration",
+    "owner": "Rohan Mehta",
+    "services": [
+      "payment-gateway",
+      "fraud-scorer"
+    ],
+    "project": "Fraud platform",
+    "team_size": 4,
+    "estimate_weeks": 5,
+    "actual_weeks": 12,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "No schema changes needed; fraud tables are self-contained",
+        "held": false,
+        "note": "Shared FK constraints with orders table"
+      },
+      {
+        "text": "p99 latency stays under 120ms after network hop",
+        "held": false,
+        "note": "p99 went to 340ms; needed gRPC + caching"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "No rollback plan if extracted service misbehaves under peak load",
+        "addressed": false,
+        "materialized": true
+      },
+      {
+        "raised_by": "Karthik Subramanian",
+        "text": "Connection pool sizing for new service not load-tested",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "7 weeks over. Peak-hour pool exhaustion caused the July checkout outage.",
+    "linked_incidents": [
+      "INC-0204",
+      "INC-0205"
+    ]
+  },
+  {
+    "id": "D-0107",
+    "team": "payments",
+    "proposed_at": "2025-06-02",
+    "closed_at": "2025-06-27",
+    "title": "UPI intent flow for mobile web",
+    "category": "feature",
+    "owner": "Arjun Nair",
+    "services": [
+      "checkout-web",
+      "payment-gateway"
+    ],
+    "project": "Acquirer integrations",
+    "team_size": 3,
+    "estimate_weeks": 3,
+    "actual_weeks": 4,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Vendor API is stable and matches the docs",
+        "held": false,
+        "note": "NPCI callback timing changed in sandbox v2"
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "1 week over due to vendor sandbox changes.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0108",
+    "team": "payments",
+    "proposed_at": "2025-07-14",
+    "closed_at": "2025-09-26",
+    "title": "Upgrade Kubernetes node pools for payments namespace to 1.29",
+    "category": "infra",
+    "owner": "Karthik Subramanian",
+    "services": [
+      "payment-gateway",
+      "ledger-service"
+    ],
+    "project": "Payments infrastructure",
+    "team_size": 3,
+    "estimate_weeks": 3,
+    "actual_weeks": 6.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Helm charts are compatible with the new API versions",
+        "held": false,
+        "note": "PodSecurityPolicy removal broke 6 charts"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "Need blue/green node pools so we can roll back",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "3.5 weeks over, but no customer impact thanks to blue/green pools.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0109",
+    "team": "payments",
+    "proposed_at": "2025-08-04",
+    "closed_at": "2025-09-05",
+    "title": "Revamp payment failure messaging and retry CTA",
+    "category": "frontend",
+    "owner": "Sneha Kulkarni",
+    "services": [
+      "checkout-web"
+    ],
+    "project": "Checkout experience",
+    "team_size": 2,
+    "estimate_weeks": 3,
+    "actual_weeks": 3.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Error codes from gateway are consistent",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "Retry success +6%.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0110",
+    "team": "payments",
+    "proposed_at": "2025-09-01",
+    "closed_at": "2025-11-21",
+    "title": "Event-source ledger with Debezium CDC",
+    "category": "data",
+    "owner": "Rohan Mehta",
+    "services": [
+      "ledger-service"
+    ],
+    "project": "Ledger modernisation",
+    "team_size": 4,
+    "estimate_weeks": 6,
+    "actual_weeks": 10,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "No schema changes needed for CDC",
+        "held": false,
+        "note": "Needed replica identity + primary keys on 9 tables"
+      },
+      {
+        "text": "Downstream consumers can handle at-least-once",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "Rollback if CDC lags during month-end close",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "4 weeks over. CDC lag during month-end close delayed reports by 6 hours.",
+    "linked_incidents": [
+      "INC-0207"
+    ]
+  },
+  {
+    "id": "D-0111",
+    "team": "payments",
+    "proposed_at": "2025-10-06",
+    "closed_at": "2025-11-07",
+    "title": "Add multi-currency display on invoices",
+    "category": "feature",
+    "owner": "Arjun Nair",
+    "services": [
+      "notification-service"
+    ],
+    "project": "Acquirer integrations",
+    "team_size": 3,
+    "estimate_weeks": 3,
+    "actual_weeks": 4.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "FX rates service has needed precision",
+        "held": false,
+        "note": "Needed 6dp rates; service had 4dp"
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "1.5 weeks over.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0112",
+    "team": "payments",
+    "proposed_at": "2025-11-03",
+    "closed_at": "2026-01-30",
+    "title": "Migrate payment-gateway queue from RabbitMQ to Kafka (phase 1: refunds)",
+    "category": "migration",
+    "owner": "Karthik Subramanian",
+    "services": [
+      "refund-worker",
+      "payment-gateway"
+    ],
+    "project": "Event-driven payments",
+    "team_size": 4,
+    "estimate_weeks": 4,
+    "actual_weeks": 9,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "No schema changes needed; reuse JSON messages as-is",
+        "held": false,
+        "note": "Needed Avro schemas + registry for consumers"
+      },
+      {
+        "text": "Consumer lag will stay under 1 minute",
+        "held": false,
+        "note": "Lag hit 25 min during sale events"
+      },
+      {
+        "text": "Ordering per merchant is preserved by default",
+        "held": false,
+        "note": "Partition key had to change"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "No rollback to RabbitMQ once producers are switched",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "5 weeks over. Refund backlog during the December sale.",
+    "linked_incidents": [
+      "INC-0209"
+    ]
+  },
+  {
+    "id": "D-0113",
+    "team": "payments",
+    "proposed_at": "2026-01-12",
+    "closed_at": "2026-02-13",
+    "title": "Checkout page performance budget (LCP < 2.0s)",
+    "category": "frontend",
+    "owner": "Sneha Kulkarni",
+    "services": [
+      "checkout-web"
+    ],
+    "project": "Checkout experience",
+    "team_size": 2,
+    "estimate_weeks": 4,
+    "actual_weeks": 4.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Third-party scripts can be deferred",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "LCP 2.6s -> 1.8s.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0114",
+    "team": "payments",
+    "proposed_at": "2026-02-09",
+    "closed_at": "2026-04-17",
+    "title": "Introduce PgBouncer in front of ledger-service",
+    "category": "infra",
+    "owner": "Karthik Subramanian",
+    "services": [
+      "ledger-service"
+    ],
+    "project": "Ledger modernisation",
+    "team_size": 3,
+    "estimate_weeks": 3,
+    "actual_weeks": 6,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Application does not rely on session-level state",
+        "held": false,
+        "note": "Prepared statements broke in transaction mode"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "Keep direct-connection fallback flag for rollback",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "3 weeks over, no incident because the fallback flag existed.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0115",
+    "team": "payments",
+    "proposed_at": "2026-03-02",
+    "closed_at": "2026-04-03",
+    "title": "Chargeback evidence upload flow",
+    "category": "feature",
+    "owner": "Arjun Nair",
+    "services": [
+      "payment-gateway"
+    ],
+    "project": "Acquirer integrations",
+    "team_size": 3,
+    "estimate_weeks": 4,
+    "actual_weeks": 5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Vendor API is stable and matches the docs",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "1 week over.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0116",
+    "team": "payments",
+    "proposed_at": "2026-05-04",
+    "closed_at": "2026-07-31",
+    "title": "Migrate fraud-scorer features to a feature store",
+    "category": "migration",
+    "owner": "Rohan Mehta",
+    "services": [
+      "fraud-scorer"
+    ],
+    "project": "Fraud platform",
+    "team_size": 4,
+    "estimate_weeks": 5,
+    "actual_weeks": 11,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "No schema changes needed; features map 1:1",
+        "held": false,
+        "note": "Point-in-time joins required new timestamp columns"
+      },
+      {
+        "text": "Online store latency under 10ms",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "Shadow-mode comparison before switching scores",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "6 weeks over; shadow mode caught a scoring regression before launch.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0117",
+    "team": "payments",
+    "proposed_at": "2026-06-08",
+    "closed_at": "2026-07-10",
+    "title": "Merchant dashboard: settlement timeline widget",
+    "category": "frontend",
+    "owner": "Sneha Kulkarni",
+    "services": [
+      "merchant-dashboard"
+    ],
+    "project": "Merchant dashboard",
+    "team_size": 2,
+    "estimate_weeks": 3,
+    "actual_weeks": 3.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Settlement API exposes per-batch status",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "On time.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0118",
+    "team": "payments",
+    "proposed_at": "2026-07-06",
+    "closed_at": "2026-09-25",
+    "title": "Move notification-service to managed Redis (ElastiCache)",
+    "category": "infra",
+    "owner": "Karthik Subramanian",
+    "services": [
+      "notification-service"
+    ],
+    "project": "Event-driven payments",
+    "team_size": 3,
+    "estimate_weeks": 3,
+    "actual_weeks": 7,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Key eviction policy is the same",
+        "held": false,
+        "note": "Default allkeys-lru evicted dedupe keys -> duplicate SMS"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "No rollback path to self-hosted Redis during cutover",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "4 weeks over; 12k duplicate SMS during cutover.",
+    "linked_incidents": [
+      "INC-0213"
+    ]
+  },
+  {
+    "id": "D-0301",
+    "team": "platform",
+    "proposed_at": "2025-01-20",
+    "closed_at": "2025-03-07",
+    "title": "Migrate CI from Jenkins to GitHub Actions self-hosted runners",
+    "category": "migration",
+    "owner": "Vikram Desai",
+    "services": [
+      "ci-runners"
+    ],
+    "project": "Developer platform",
+    "team_size": 4,
+    "estimate_weeks": 5,
+    "actual_weeks": 6.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "All pipelines can be converted with the importer",
+        "held": true,
+        "note": ""
+      },
+      {
+        "text": "Teams will adopt the new pipelines voluntarily",
+        "held": false,
+        "note": "Only 4/17 teams moved until Jenkins was frozen"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Meera Joshi",
+        "text": "Runner autoscaling cost may spike",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "1.5 weeks over; adoption needed a hard Jenkins freeze date.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0302",
+    "team": "platform",
+    "proposed_at": "2025-03-03",
+    "closed_at": "2025-06-13",
+    "title": "SOC 2 Type II evidence automation",
+    "category": "security",
+    "owner": "Farah Khan",
+    "services": [
+      "secrets-vault",
+      "observability-stack"
+    ],
+    "project": "Compliance programme",
+    "team_size": 4,
+    "estimate_weeks": 4,
+    "actual_weeks": 10,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Existing logs cover access-review evidence",
+        "held": false,
+        "note": "Needed 90-day retention + new audit trails"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Aditya Rao",
+        "text": "Auditor sampling may need manual exports",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "6 weeks over; auditor requested manual exports anyway.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0309",
+    "team": "platform",
+    "proposed_at": "2025-04-14",
+    "closed_at": "2025-05-30",
+    "title": "Upgrade service-mesh to Istio 1.22",
+    "category": "migration",
+    "owner": "Aditya Rao",
+    "services": [
+      "service-mesh"
+    ],
+    "project": "Cluster operations",
+    "team_size": 4,
+    "estimate_weeks": 4,
+    "actual_weeks": 5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Sidecar injection works for all namespaces",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Meera Joshi",
+        "text": "Canary namespace first",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "1 week over.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0303",
+    "team": "platform",
+    "proposed_at": "2025-06-09",
+    "closed_at": "2025-08-01",
+    "title": "Internal developer portal (Backstage)",
+    "category": "developer-experience",
+    "owner": "Meera Joshi",
+    "services": [
+      "dev-portal"
+    ],
+    "project": "Developer platform",
+    "team_size": 3,
+    "estimate_weeks": 5,
+    "actual_weeks": 8,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Teams will adopt the portal voluntarily",
+        "held": false,
+        "note": "Catalog stayed 30% complete until made mandatory for deploys"
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "3 weeks over; adoption only after deploy gating.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0304",
+    "team": "platform",
+    "proposed_at": "2025-08-18",
+    "closed_at": "2025-11-14",
+    "title": "Rotate all service secrets into Vault with dynamic DB creds",
+    "category": "security",
+    "owner": "Farah Khan",
+    "services": [
+      "secrets-vault"
+    ],
+    "project": "Compliance programme",
+    "team_size": 4,
+    "estimate_weeks": 5,
+    "actual_weeks": 12,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Services can reload credentials without restart",
+        "held": false,
+        "note": "11 services cached creds at boot"
+      },
+      {
+        "text": "Teams will adopt the Vault sidecar voluntarily",
+        "held": false,
+        "note": "Needed a platform-run migration sprint"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Nikhil Bansal",
+        "text": "Credential TTL expiry could cause outages",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "7 weeks over; one outage from expired DB creds.",
+    "linked_incidents": [
+      "INC-0302"
+    ]
+  },
+  {
+    "id": "D-0305",
+    "team": "platform",
+    "proposed_at": "2025-10-06",
+    "closed_at": "2025-11-21",
+    "title": "Consolidate logging from ELK to Grafana Loki",
+    "category": "migration",
+    "owner": "Aditya Rao",
+    "services": [
+      "observability-stack"
+    ],
+    "project": "Cluster operations",
+    "team_size": 4,
+    "estimate_weeks": 5,
+    "actual_weeks": 6.5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Query patterns translate to LogQL",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Meera Joshi",
+        "text": "Keep ELK read-only for 30 days for rollback",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "1.5 weeks over.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0306",
+    "team": "platform",
+    "proposed_at": "2026-01-05",
+    "closed_at": "2026-04-10",
+    "title": "PCI-DSS 4.0 network segmentation for cardholder environment",
+    "category": "security",
+    "owner": "Farah Khan",
+    "services": [
+      "k8s-cluster",
+      "service-mesh"
+    ],
+    "project": "Compliance programme",
+    "team_size": 4,
+    "estimate_weeks": 6,
+    "actual_weeks": 14,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Network policies can be applied without app changes",
+        "held": false,
+        "note": "6 services needed egress rewrites"
+      },
+      {
+        "text": "Teams will adopt the new ingress pattern voluntarily",
+        "held": false,
+        "note": "Required enforcement in admission controller"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Nikhil Bansal",
+        "text": "Strict policies might block health checks",
+        "addressed": false,
+        "materialized": true
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "8 weeks over; health-check blocking caused a 40-minute partial outage.",
+    "linked_incidents": [
+      "INC-0304"
+    ]
+  },
+  {
+    "id": "D-0307",
+    "team": "platform",
+    "proposed_at": "2026-03-09",
+    "closed_at": "2026-04-24",
+    "title": "Upgrade EKS control plane 1.28 -> 1.30",
+    "category": "infra",
+    "owner": "Vikram Desai",
+    "services": [
+      "k8s-cluster"
+    ],
+    "project": "Cluster operations",
+    "team_size": 3,
+    "estimate_weeks": 4,
+    "actual_weeks": 5,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "Add-ons have compatible versions",
+        "held": true,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Meera Joshi",
+        "text": "Upgrade staging cluster a week earlier",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "1 week over.",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0119",
+    "team": "payments",
+    "proposed_at": "2026-10-05",
+    "closed_at": null,
+    "title": "Shard ledger-service Postgres by merchant_id",
+    "category": "migration",
+    "owner": "Rohan Mehta",
+    "services": [
+      "ledger-service",
+      "postgres-ledger"
+    ],
+    "project": "Ledger modernisation",
+    "team_size": 4,
+    "estimate_weeks": 6,
+    "actual_weeks": null,
+    "status": "open",
+    "assumptions": [
+      {
+        "text": "No schema changes needed; Citus handles distribution",
+        "held": null,
+        "note": ""
+      },
+      {
+        "text": "Cross-shard reports can be served from the replica",
+        "held": null,
+        "note": ""
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Priya Raman",
+        "text": "No rollback path once writes are distributed",
+        "addressed": null,
+        "materialized": null
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0120",
+    "team": "payments",
+    "proposed_at": "2026-08-10",
+    "closed_at": "2026-09-04",
+    "title": "Adopt OpenTelemetry tracing in checkout",
+    "category": "infra",
+    "owner": "Arjun Nair",
+    "services": [
+      "checkout-web",
+      "payment-gateway"
+    ],
+    "project": "Checkout experience",
+    "team_size": 3,
+    "estimate_weeks": 2,
+    "actual_weeks": 2.5,
+    "status": "closed",
+    "assumptions": [],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0310",
+    "team": "platform",
+    "proposed_at": "2026-10-12",
+    "closed_at": null,
+    "title": "Move CI runners to ARM (Graviton) instances",
+    "category": "infra",
+    "owner": "Vikram Desai",
+    "services": [
+      "ci-runners"
+    ],
+    "project": "Developer platform",
+    "team_size": 3,
+    "estimate_weeks": 3,
+    "actual_weeks": null,
+    "status": "open",
+    "assumptions": [
+      {
+        "text": "All build images already publish arm64 variants",
+        "held": null,
+        "note": ""
+      }
+    ],
+    "risks": [],
+    "progress": [],
+    "outcome_summary": "",
+    "linked_incidents": []
+  },
+  {
+    "id": "D-0308",
+    "team": "platform",
+    "proposed_at": "2026-06-01",
+    "closed_at": "2026-08-28",
+    "title": "SSO + SCIM for all internal tools",
+    "category": "security",
+    "owner": "Farah Khan",
+    "services": [
+      "dev-portal",
+      "secrets-vault"
+    ],
+    "project": "Compliance programme",
+    "team_size": 4,
+    "estimate_weeks": 4,
+    "actual_weeks": 9,
+    "status": "closed",
+    "assumptions": [
+      {
+        "text": "All tools support SCIM provisioning",
+        "held": false,
+        "note": "3 tools needed custom connectors"
+      }
+    ],
+    "risks": [
+      {
+        "raised_by": "Aditya Rao",
+        "text": "Break-glass admin accounts needed",
+        "addressed": true,
+        "materialized": false
+      }
+    ],
+    "progress": [],
+    "outcome_summary": "5 weeks over.",
+    "linked_incidents": []
+  }
+]

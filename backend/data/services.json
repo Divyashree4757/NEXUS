@@ -1,0 +1,169 @@
+[
+  {
+    "name": "checkout-web",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": true,
+    "depends_on": [
+      "payment-gateway"
+    ]
+  },
+  {
+    "name": "payment-gateway",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": true,
+    "depends_on": [
+      "fraud-scorer",
+      "ledger-service",
+      "postgres-payments"
+    ]
+  },
+  {
+    "name": "fraud-scorer",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": false,
+    "depends_on": [
+      "postgres-payments",
+      "feature-store"
+    ]
+  },
+  {
+    "name": "ledger-service",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": false,
+    "depends_on": [
+      "postgres-ledger"
+    ]
+  },
+  {
+    "name": "refund-worker",
+    "team": "payments",
+    "tier": "standard",
+    "runbook": false,
+    "depends_on": [
+      "payment-gateway",
+      "ledger-service",
+      "kafka-cluster"
+    ]
+  },
+  {
+    "name": "notification-service",
+    "team": "payments",
+    "tier": "standard",
+    "runbook": false,
+    "depends_on": [
+      "redis-notifications",
+      "payment-gateway"
+    ]
+  },
+  {
+    "name": "merchant-dashboard",
+    "team": "payments",
+    "tier": "standard",
+    "runbook": true,
+    "depends_on": [
+      "ledger-service"
+    ]
+  },
+  {
+    "name": "settlement-reports",
+    "team": "payments",
+    "tier": "standard",
+    "runbook": false,
+    "depends_on": [
+      "ledger-service",
+      "postgres-ledger"
+    ]
+  },
+  {
+    "name": "postgres-payments",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": true,
+    "depends_on": []
+  },
+  {
+    "name": "postgres-ledger",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": false,
+    "depends_on": []
+  },
+  {
+    "name": "kafka-cluster",
+    "team": "payments",
+    "tier": "critical",
+    "runbook": false,
+    "depends_on": []
+  },
+  {
+    "name": "redis-notifications",
+    "team": "payments",
+    "tier": "standard",
+    "runbook": false,
+    "depends_on": []
+  },
+  {
+    "name": "feature-store",
+    "team": "payments",
+    "tier": "standard",
+    "runbook": false,
+    "depends_on": []
+  },
+  {
+    "name": "k8s-cluster",
+    "team": "platform",
+    "tier": "critical",
+    "runbook": true,
+    "depends_on": []
+  },
+  {
+    "name": "service-mesh",
+    "team": "platform",
+    "tier": "critical",
+    "runbook": false,
+    "depends_on": [
+      "k8s-cluster"
+    ]
+  },
+  {
+    "name": "ci-runners",
+    "team": "platform",
+    "tier": "standard",
+    "runbook": true,
+    "depends_on": [
+      "k8s-cluster"
+    ]
+  },
+  {
+    "name": "secrets-vault",
+    "team": "platform",
+    "tier": "critical",
+    "runbook": false,
+    "depends_on": [
+      "k8s-cluster"
+    ]
+  },
+  {
+    "name": "observability-stack",
+    "team": "platform",
+    "tier": "standard",
+    "runbook": false,
+    "depends_on": [
+      "k8s-cluster"
+    ]
+  },
+  {
+    "name": "dev-portal",
+    "team": "platform",
+    "tier": "standard",
+    "runbook": true,
+    "depends_on": [
+      "ci-runners",
+      "secrets-vault"
+    ]
+  }
+]

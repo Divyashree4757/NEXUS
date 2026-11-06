@@ -1,0 +1,1016 @@
+[
+  {
+    "severity": "SEV1",
+    "logs": [
+      "2025-03-04T14:02:11Z ledger-service WARN  latency p99 above SLO threshold",
+      "2025-03-04T14:03:47Z ledger-service ERROR ERROR ledger.reconcile: balance mismatch account=... delta=...",
+      "2025-03-04T14:03:48Z ledger-service ERROR ERROR ledger.reconcile: balance mismatch account=... delta=...",
+      "2025-03-04T14:04:05Z alertmanager FIRING ledger-service-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-03-04T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-03-04T14:08:00Z",
+        "event": "Restart ledger-service pods",
+        "kind": "fix-failed"
+      },
+      {
+        "at": "2025-03-04T14:25:00Z",
+        "event": "Pause dual-write and replay from MySQL binlog",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-03-04T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0201",
+    "team": "payments",
+    "date": "2025-03-04",
+    "service": "ledger-service",
+    "title": "Ledger writes frozen during dual-write divergence",
+    "error_signature": "ERROR ledger.reconcile: balance mismatch account=... delta=...",
+    "symptoms": [
+      "ledger writes rejected",
+      "reconciliation alarms"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart ledger-service pods",
+        "result": "failed",
+        "lasted_days": 0
+      },
+      {
+        "action": "Pause dual-write and replay from MySQL binlog",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Dual-write path had no ordering guarantee; no tested rollback",
+    "resolution": "Paused dual-write, replayed binlog, added reconciliation gate",
+    "linked_decision": "D-0101",
+    "ttr_minutes": 128,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": [
+      "merchant-dashboard",
+      "settlement-reports"
+    ]
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2025-04-11T14:02:11Z refund-worker WARN  latency p99 above SLO threshold",
+      "2025-04-11T14:03:47Z refund-worker ERROR WARN refund.process: message redelivered receiveCount=3",
+      "2025-04-11T14:03:48Z refund-worker ERROR WARN refund.process: message redelivered receiveCount=3",
+      "2025-04-11T14:04:05Z alertmanager FIRING refund-worker-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-04-11T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-04-11T14:08:00Z",
+        "event": "Increase SQS visibility timeout",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-04-11T14:25:00Z",
+        "event": "Add idempotency key on refund_id",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-04-11T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0202",
+    "team": "payments",
+    "date": "2025-04-11",
+    "service": "refund-worker",
+    "title": "Duplicate refunds after SQS redelivery",
+    "error_signature": "WARN refund.process: message redelivered receiveCount=3",
+    "symptoms": [
+      "duplicate refunds",
+      "merchant complaints"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Increase SQS visibility timeout",
+        "result": "temporary",
+        "lasted_days": 4
+      },
+      {
+        "action": "Add idempotency key on refund_id",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Non-idempotent consumer + redelivery",
+    "resolution": "Idempotency key on refund_id",
+    "linked_decision": "D-0103",
+    "ttr_minutes": 340,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2025-05-22T14:02:11Z payment-gateway WARN  latency p99 above SLO threshold",
+      "2025-05-22T14:03:47Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2025-05-22T14:03:48Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2025-05-22T14:04:05Z alertmanager FIRING payment-gateway-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-05-22T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-05-22T14:08:00Z",
+        "event": "Restart payment-gateway pods",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-05-22T14:25:00Z",
+        "event": "Increase max pool size 20 -> 80",
+        "kind": "fix-failed"
+      },
+      {
+        "at": "2025-05-22T14:42:00Z",
+        "event": "Move fraud queries to read replica",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-05-22T14:59:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0203",
+    "team": "payments",
+    "date": "2025-05-22",
+    "service": "payment-gateway",
+    "title": "DB connection timeouts on payment-gateway",
+    "error_signature": "HikariPool-1 - Connection is not available, request timed out after 30000ms",
+    "symptoms": [
+      "p99 latency 4s",
+      "payment failures 12%"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart payment-gateway pods",
+        "result": "temporary",
+        "lasted_days": 3
+      },
+      {
+        "action": "Increase max pool size 20 -> 80",
+        "result": "failed",
+        "lasted_days": 0
+      },
+      {
+        "action": "Move fraud queries to read replica",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Pool exhaustion from long-running fraud queries holding connections",
+    "resolution": "Moved fraud queries to read replica",
+    "linked_decision": null,
+    "ttr_minutes": 96,
+    "status": "resolved",
+    "context": {
+      "replicas": 6,
+      "pool_per_pod": 20,
+      "db_max_connections": 200,
+      "pgbouncer": false,
+      "workload": "long-running fraud queries holding connections",
+      "architecture": "monolith + read replica"
+    },
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV1",
+    "logs": [
+      "2025-07-08T14:02:11Z payment-gateway WARN  latency p99 above SLO threshold",
+      "2025-07-08T14:03:47Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2025-07-08T14:03:48Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2025-07-08T14:04:05Z alertmanager FIRING payment-gateway-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-07-08T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-07-08T14:08:00Z",
+        "event": "Restart payment-gateway pods",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-07-08T14:25:00Z",
+        "event": "Scale out gateway replicas 6 -> 12",
+        "kind": "fix-failed"
+      },
+      {
+        "at": "2025-07-08T14:42:00Z",
+        "event": "Reduce per-pod pool size 50 -> 15 and add PgBouncer",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-07-08T14:59:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0204",
+    "team": "payments",
+    "date": "2025-07-08",
+    "service": "payment-gateway",
+    "title": "Checkout outage at peak: connection pool exhausted",
+    "error_signature": "HikariPool-1 - Connection is not available, request timed out after 30000ms",
+    "symptoms": [
+      "checkout 5xx 31%",
+      "DB connections at max"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart payment-gateway pods",
+        "result": "temporary",
+        "lasted_days": 2
+      },
+      {
+        "action": "Scale out gateway replicas 6 -> 12",
+        "result": "failed",
+        "lasted_days": 0
+      },
+      {
+        "action": "Reduce per-pod pool size 50 -> 15 and add PgBouncer",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "More replicas x large per-pod pools exceeded Postgres max_connections after fraud-scorer extraction",
+    "resolution": "Smaller per-pod pools + PgBouncer",
+    "linked_decision": "D-0106",
+    "ttr_minutes": 74,
+    "status": "resolved",
+    "context": {
+      "replicas": 12,
+      "pool_per_pod": 50,
+      "db_max_connections": 500,
+      "pgbouncer": false,
+      "workload": "peak checkout traffic",
+      "architecture": "gateway + extracted fraud-scorer"
+    },
+    "impacted_services": [
+      "checkout-web"
+    ]
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2025-07-19T14:02:11Z fraud-scorer WARN  latency p99 above SLO threshold",
+      "2025-07-19T14:03:47Z fraud-scorer ERROR DeadlineExceeded: fraud-scorer /score 800ms",
+      "2025-07-19T14:03:48Z fraud-scorer ERROR DeadlineExceeded: fraud-scorer /score 800ms",
+      "2025-07-19T14:04:05Z alertmanager FIRING fraud-scorer-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-07-19T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-07-19T14:08:00Z",
+        "event": "Restart fraud-scorer",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-07-19T14:25:00Z",
+        "event": "Add circuit breaker + cached score fallback",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-07-19T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0205",
+    "team": "payments",
+    "date": "2025-07-19",
+    "service": "fraud-scorer",
+    "title": "fraud-scorer timeouts cascade into checkout",
+    "error_signature": "DeadlineExceeded: fraud-scorer /score 800ms",
+    "symptoms": [
+      "checkout latency spike",
+      "fallback scoring engaged"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart fraud-scorer",
+        "result": "temporary",
+        "lasted_days": 1
+      },
+      {
+        "action": "Add circuit breaker + cached score fallback",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Synchronous dependency with no breaker",
+    "resolution": "Circuit breaker with cached fallback",
+    "linked_decision": "D-0106",
+    "ttr_minutes": 52,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": [
+      "payment-gateway",
+      "checkout-web"
+    ]
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2025-08-27T14:02:11Z payment-gateway WARN  latency p99 above SLO threshold",
+      "2025-08-27T14:03:47Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2025-08-27T14:03:48Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2025-08-27T14:04:05Z alertmanager FIRING payment-gateway-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-08-27T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-08-27T14:08:00Z",
+        "event": "Restart payment-gateway pods",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-08-27T14:25:00Z",
+        "event": "Increase max pool size",
+        "kind": "fix-failed"
+      },
+      {
+        "at": "2025-08-27T14:42:00Z",
+        "event": "Kill long transactions >30s and add statement_timeout",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-08-27T14:59:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0206",
+    "team": "payments",
+    "date": "2025-08-27",
+    "service": "payment-gateway",
+    "title": "Connection timeouts during flash sale",
+    "error_signature": "HikariPool-1 - Connection is not available, request timed out after 30000ms",
+    "symptoms": [
+      "payment failures 8%"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart payment-gateway pods",
+        "result": "temporary",
+        "lasted_days": 5
+      },
+      {
+        "action": "Increase max pool size",
+        "result": "failed",
+        "lasted_days": 0
+      },
+      {
+        "action": "Kill long transactions >30s and add statement_timeout",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Long-running transactions holding pool connections",
+    "resolution": "statement_timeout=5s, idle_in_transaction timeout",
+    "linked_decision": null,
+    "ttr_minutes": 61,
+    "status": "resolved",
+    "context": {
+      "replicas": 8,
+      "pool_per_pod": 50,
+      "db_max_connections": 500,
+      "pgbouncer": false,
+      "workload": "flash sale with long transactions",
+      "architecture": "gateway + extracted fraud-scorer"
+    },
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV3",
+    "logs": [
+      "2025-11-30T14:02:11Z ledger-service WARN  latency p99 above SLO threshold",
+      "2025-11-30T14:03:47Z ledger-service ERROR Debezium connector lag 21600s",
+      "2025-11-30T14:03:48Z ledger-service ERROR Debezium connector lag 21600s",
+      "2025-11-30T14:04:05Z alertmanager FIRING ledger-service-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-11-30T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-11-30T14:08:00Z",
+        "event": "Restart Debezium connector",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-11-30T14:25:00Z",
+        "event": "Increase connector tasks and snapshot.fetch.size",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-11-30T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0207",
+    "team": "payments",
+    "date": "2025-11-30",
+    "service": "ledger-service",
+    "title": "CDC lag delays month-end settlement reports",
+    "error_signature": "Debezium connector lag 21600s",
+    "symptoms": [
+      "reports delayed 6h"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart Debezium connector",
+        "result": "temporary",
+        "lasted_days": 1
+      },
+      {
+        "action": "Increase connector tasks and snapshot.fetch.size",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Single-task connector during month-end write burst",
+    "resolution": "Parallel tasks + heartbeat tuning",
+    "linked_decision": "D-0110",
+    "ttr_minutes": 390,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": [
+      "settlement-reports"
+    ]
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2026-01-09T14:02:11Z payment-gateway WARN  latency p99 above SLO threshold",
+      "2026-01-09T14:03:47Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2026-01-09T14:03:48Z payment-gateway ERROR HikariPool-1 - Connection is not available, request timed out after 30000ms",
+      "2026-01-09T14:04:05Z alertmanager FIRING payment-gateway-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2026-01-09T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2026-01-09T14:08:00Z",
+        "event": "Restart payment-gateway pods",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2026-01-09T14:25:00Z",
+        "event": "Reduce per-pod pool size and route via PgBouncer",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2026-01-09T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0208",
+    "team": "payments",
+    "date": "2026-01-09",
+    "service": "payment-gateway",
+    "title": "Payment API latency + DB timeouts after deploy",
+    "error_signature": "HikariPool-1 - Connection is not available, request timed out after 30000ms",
+    "symptoms": [
+      "p99 2.8s",
+      "timeouts"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart payment-gateway pods",
+        "result": "temporary",
+        "lasted_days": 2
+      },
+      {
+        "action": "Reduce per-pod pool size and route via PgBouncer",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "New deploy reset pool size to default 50",
+    "resolution": "Pinned pool size in config; PgBouncer",
+    "linked_decision": null,
+    "ttr_minutes": 45,
+    "status": "resolved",
+    "context": {
+      "replicas": 10,
+      "pool_per_pod": 50,
+      "db_max_connections": 500,
+      "pgbouncer": false,
+      "workload": "normal traffic after deploy",
+      "architecture": "gateway + extracted fraud-scorer"
+    },
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2025-12-14T14:02:11Z refund-worker WARN  latency p99 above SLO threshold",
+      "2025-12-14T14:03:47Z refund-worker ERROR kafka consumer group refund-v2 lag=148213",
+      "2025-12-14T14:03:48Z refund-worker ERROR kafka consumer group refund-v2 lag=148213",
+      "2025-12-14T14:04:05Z alertmanager FIRING refund-worker-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-12-14T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-12-14T14:08:00Z",
+        "event": "Restart consumers",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-12-14T14:25:00Z",
+        "event": "Add partitions 6 -> 24 and rebalance",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-12-14T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0209",
+    "team": "payments",
+    "date": "2025-12-14",
+    "service": "refund-worker",
+    "title": "Refund backlog: Kafka consumer lag 25 minutes",
+    "error_signature": "kafka consumer group refund-v2 lag=148213",
+    "symptoms": [
+      "refunds delayed",
+      "support tickets spike"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart consumers",
+        "result": "temporary",
+        "lasted_days": 0
+      },
+      {
+        "action": "Add partitions 6 -> 24 and rebalance",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Partition count too low for sale traffic; no rollback to RabbitMQ",
+    "resolution": "More partitions, autoscaling consumers",
+    "linked_decision": "D-0112",
+    "ttr_minutes": 210,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": [
+      "payment-gateway"
+    ]
+  },
+  {
+    "severity": "SEV3",
+    "logs": [
+      "2026-08-21T14:02:11Z notification-service WARN  latency p99 above SLO threshold",
+      "2026-08-21T14:03:47Z notification-service ERROR dedupe key missing for notification_id",
+      "2026-08-21T14:03:48Z notification-service ERROR dedupe key missing for notification_id",
+      "2026-08-21T14:04:05Z alertmanager FIRING notification-service-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2026-08-21T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2026-08-21T14:08:00Z",
+        "event": "Flush Redis cache",
+        "kind": "fix-failed"
+      },
+      {
+        "at": "2026-08-21T14:25:00Z",
+        "event": "Set maxmemory-policy volatile-lru and TTL on dedupe keys",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2026-08-21T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0213",
+    "team": "payments",
+    "date": "2026-08-21",
+    "service": "notification-service",
+    "title": "Duplicate SMS after Redis migration",
+    "error_signature": "dedupe key missing for notification_id",
+    "symptoms": [
+      "customers received 2-4 SMS"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Flush Redis cache",
+        "result": "failed",
+        "lasted_days": 0
+      },
+      {
+        "action": "Set maxmemory-policy volatile-lru and TTL on dedupe keys",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "allkeys-lru evicted dedupe keys",
+    "resolution": "volatile-lru + separate dedupe cluster",
+    "linked_decision": "D-0118",
+    "ttr_minutes": 150,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV2",
+    "logs": [
+      "2025-10-14T14:02:11Z ledger-service WARN  latency p99 above SLO threshold",
+      "2025-10-14T14:03:47Z ledger-service ERROR HikariPool-2 - Connection is not available, request timed out after 30000ms",
+      "2025-10-14T14:03:48Z ledger-service ERROR HikariPool-2 - Connection is not available, request timed out after 30000ms",
+      "2025-10-14T14:04:05Z alertmanager FIRING ledger-service-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-10-14T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-10-14T14:08:00Z",
+        "event": "Restart ledger-service pods",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-10-14T14:25:00Z",
+        "event": "Increase max pool size 10 -> 40",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-10-14T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0210",
+    "team": "payments",
+    "date": "2025-10-14",
+    "service": "ledger-service",
+    "title": "Ledger API request queueing: connection pool too small",
+    "error_signature": "HikariPool-2 - Connection is not available, request timed out after 30000ms",
+    "symptoms": [
+      "p99 1.9s",
+      "ledger writes queueing"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart ledger-service pods",
+        "result": "temporary",
+        "lasted_days": 1
+      },
+      {
+        "action": "Increase max pool size 10 -> 40",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Pool of 10 per pod far below concurrent request load; database had ample headroom (60 of 400 connections in use)",
+    "resolution": "Raised pool to 40 per pod",
+    "linked_decision": null,
+    "ttr_minutes": 38,
+    "status": "resolved",
+    "context": {
+      "replicas": 3,
+      "pool_per_pod": 10,
+      "db_max_connections": 400,
+      "pgbouncer": false,
+      "workload": "short OLTP queries, high concurrency",
+      "architecture": "ledger-service, single primary"
+    },
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV3",
+    "logs": [
+      "2026-09-30T14:02:11Z settlement-reports WARN  latency p99 above SLO threshold",
+      "2026-09-30T14:03:47Z settlement-reports ERROR Job settlement_daily exceeded 3600s timeout",
+      "2026-09-30T14:03:48Z settlement-reports ERROR Job settlement_daily exceeded 3600s timeout",
+      "2026-09-30T14:04:05Z alertmanager FIRING settlement-reports-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2026-09-30T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2026-09-30T14:08:00Z",
+        "event": "Re-run job manually",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2026-09-30T14:25:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0215",
+    "team": "payments",
+    "date": "2026-09-30",
+    "service": "settlement-reports",
+    "title": "Month-end settlement report job timed out",
+    "error_signature": "Job settlement_daily exceeded 3600s timeout",
+    "symptoms": [
+      "finance reports missing at 09:00"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Re-run job manually",
+        "result": "temporary",
+        "lasted_days": 3
+      }
+    ],
+    "root_cause": null,
+    "resolution": null,
+    "linked_decision": null,
+    "ttr_minutes": 240,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV1",
+    "logs": [
+      "2025-10-21T14:02:11Z secrets-vault WARN  latency p99 above SLO threshold",
+      "2025-10-21T14:03:47Z secrets-vault ERROR FATAL: password authentication failed for user v-orders-...",
+      "2025-10-21T14:03:48Z secrets-vault ERROR FATAL: password authentication failed for user v-orders-...",
+      "2025-10-21T14:04:05Z alertmanager FIRING secrets-vault-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2025-10-21T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2025-10-21T14:08:00Z",
+        "event": "Restart affected services",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2025-10-21T14:25:00Z",
+        "event": "Implement credential renewal hook + longer TTL",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2025-10-21T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0302",
+    "team": "platform",
+    "date": "2025-10-21",
+    "service": "secrets-vault",
+    "title": "Orders DB auth failures after credential TTL expiry",
+    "error_signature": "FATAL: password authentication failed for user v-orders-...",
+    "symptoms": [
+      "orders API 500s"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart affected services",
+        "result": "temporary",
+        "lasted_days": 1
+      },
+      {
+        "action": "Implement credential renewal hook + longer TTL",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Services cached dynamic creds at boot",
+    "resolution": "Renewal sidecar",
+    "linked_decision": "D-0304",
+    "ttr_minutes": 88,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": [
+      "dev-portal"
+    ]
+  },
+  {
+    "severity": "SEV3",
+    "logs": [
+      "2026-02-03T14:02:11Z ci-runners WARN  latency p99 above SLO threshold",
+      "2026-02-03T14:03:47Z ci-runners ERROR Waiting for a runner to pick up this job... (45m)",
+      "2026-02-03T14:03:48Z ci-runners ERROR Waiting for a runner to pick up this job... (45m)",
+      "2026-02-03T14:04:05Z alertmanager FIRING ci-runners-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2026-02-03T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2026-02-03T14:08:00Z",
+        "event": "Manually add runners",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2026-02-03T14:25:00Z",
+        "event": "Fix autoscaler min-idle + spot fallback",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2026-02-03T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0303",
+    "team": "platform",
+    "date": "2026-02-03",
+    "service": "ci-runners",
+    "title": "CI runner queue saturation",
+    "error_signature": "Waiting for a runner to pick up this job... (45m)",
+    "symptoms": [
+      "builds queued 45min"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Manually add runners",
+        "result": "temporary",
+        "lasted_days": 2
+      },
+      {
+        "action": "Fix autoscaler min-idle + spot fallback",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Spot capacity shortage, no on-demand fallback",
+    "resolution": "Mixed instances policy",
+    "linked_decision": null,
+    "ttr_minutes": 120,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": []
+  },
+  {
+    "severity": "SEV1",
+    "logs": [
+      "2026-03-18T14:02:11Z k8s-cluster WARN  latency p99 above SLO threshold",
+      "2026-03-18T14:03:47Z k8s-cluster ERROR Readiness probe failed: connection refused",
+      "2026-03-18T14:03:48Z k8s-cluster ERROR Readiness probe failed: connection refused",
+      "2026-03-18T14:04:05Z alertmanager FIRING k8s-cluster-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2026-03-18T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2026-03-18T14:08:00Z",
+        "event": "Restart pods",
+        "kind": "fix-failed"
+      },
+      {
+        "at": "2026-03-18T14:25:00Z",
+        "event": "Allow kubelet CIDR in NetworkPolicy",
+        "kind": "fix-resolved"
+      },
+      {
+        "at": "2026-03-18T14:42:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0304",
+    "team": "platform",
+    "date": "2026-03-18",
+    "service": "k8s-cluster",
+    "title": "Health checks blocked by new network policies",
+    "error_signature": "Readiness probe failed: connection refused",
+    "symptoms": [
+      "pods flapping",
+      "partial outage 40m"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart pods",
+        "result": "failed",
+        "lasted_days": 0
+      },
+      {
+        "action": "Allow kubelet CIDR in NetworkPolicy",
+        "result": "resolved",
+        "lasted_days": null
+      }
+    ],
+    "root_cause": "Default-deny policy blocked kubelet probes",
+    "resolution": "Policy exception for probes",
+    "linked_decision": "D-0306",
+    "ttr_minutes": 40,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": [
+      "service-mesh"
+    ]
+  },
+  {
+    "severity": "SEV3",
+    "logs": [
+      "2026-07-22T14:02:11Z observability-stack WARN  latency p99 above SLO threshold",
+      "2026-07-22T14:03:47Z observability-stack ERROR level=warn msg=\"push request failed\" err=\"rate limit exceeded\"",
+      "2026-07-22T14:03:48Z observability-stack ERROR level=warn msg=\"push request failed\" err=\"rate limit exceeded\"",
+      "2026-07-22T14:04:05Z alertmanager FIRING observability-stack-error-rate"
+    ],
+    "timeline": [
+      {
+        "at": "2026-07-22T14:02:00Z",
+        "event": "Alert fired",
+        "kind": "detected"
+      },
+      {
+        "at": "2026-07-22T14:08:00Z",
+        "event": "Restart ingesters",
+        "kind": "fix-temporary"
+      },
+      {
+        "at": "2026-07-22T14:25:00Z",
+        "event": "Incident resolved",
+        "kind": "resolved"
+      }
+    ],
+    "id": "INC-0305",
+    "team": "platform",
+    "date": "2026-07-22",
+    "service": "observability-stack",
+    "title": "Loki ingesters dropping logs under load",
+    "error_signature": "level=warn msg=\"push request failed\" err=\"rate limit exceeded\"",
+    "symptoms": [
+      "missing logs for 2 hours"
+    ],
+    "attempted_fixes": [
+      {
+        "action": "Restart ingesters",
+        "result": "temporary",
+        "lasted_days": 4
+      }
+    ],
+    "root_cause": null,
+    "resolution": null,
+    "linked_decision": null,
+    "ttr_minutes": 95,
+    "status": "resolved",
+    "context": null,
+    "impacted_services": []
+  }
+]
