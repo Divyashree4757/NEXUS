@@ -6,7 +6,7 @@ Nobody was being careless. The person on call simply didn't know the restart had
 
 So I built NEXUS: an agent that remembers what an engineering team decided, what it assumed, who warned about what, how long the work really took, and which fixes actually worked. The memory layer is [Hindsight](https://github.com/vectorize-io/hindsight), and it ended up shaping the whole design.
 
-![NEXUS overview dashboard](docs/img/overview.png)
+![NEXUS overview dashboard](https://raw.githubusercontent.com/Divyashree4757/NEXUS/main/docs/img/overview.png)
 
 ## What NEXUS does
 
@@ -78,11 +78,11 @@ Here's the same proposal with the same model, once without memory and once with 
 
 Every bullet links to the decisions and incidents behind it.
 
-![Premortem with memory-backed evidence](docs/img/analysis.png)
+![Premortem with memory-backed evidence](https://raw.githubusercontent.com/Divyashree4757/NEXUS/main/docs/img/analysis.png)
 
 On the incident side, the restart story finally gets its answer. For a new `HikariPool - Connection is not available` alert on `payment-gateway`, RECALL-X shows that restarting was tried on four similar incidents and only ever lasted about three days, that increasing the pool size failed twice, and that reducing per-pod pools and adding PgBouncer resolved it twice. You can even type a fix you're about to try and it will warn you if it failed before.
 
-![Incident investigation with failed-fix warning](docs/img/incident.png)
+![Incident investigation with failed-fix warning](https://raw.githubusercontent.com/Divyashree4757/NEXUS/main/docs/img/incident.png)
 
 ## The part I didn't plan for: memories that disagree
 
@@ -90,7 +90,7 @@ Once the history grew, Hindsight started returning memories that contradicted ea
 
 A naive agent would average those or pick the most recent. Instead, NEXUS now detects the conflict and compares the context recorded with each incident. In this case the difference is arithmetic: in the incident where a bigger pool worked, 3 replicas × 40 connections used 120 of 400 available. Where it failed, 6 replicas × 80 asked for 480 against a limit of 200. The recommendation becomes "check replicas × pool size against the database limit first", not "increase the pool" or "never increase the pool".
 
-![Memory conflict panel](docs/img/conflicts.png)
+![Memory conflict panel](https://raw.githubusercontent.com/Divyashree4757/NEXUS/main/docs/img/conflicts.png)
 
 That's the behaviour I'd want from a senior engineer: don't hide the contradicting evidence, explain it.
 
@@ -98,7 +98,7 @@ That's the behaviour I'd want from a senior engineer: don't hide the contradicti
 
 To check that memory improves predictions rather than just decorating them, I replayed every closed decision in order, letting NEXUS use only the memories that existed on the day each one was proposed. On the seeded history, raw team estimates were off by roughly 36% on average over the last few decisions, while memory-corrected estimates were off by about 19%. That's illustrative data, so treat it as a proof of mechanism rather than a benchmark, but the direction is the point: the agent improves because outcomes are retained and recalled, not because any model was retrained.
 
-![Learning curve](docs/img/accuracy.png)
+![Learning curve](https://raw.githubusercontent.com/Divyashree4757/NEXUS/main/docs/img/accuracy.png)
 
 ## Lessons learned
 
