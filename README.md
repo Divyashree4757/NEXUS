@@ -7,7 +7,7 @@ NEXUS is an AI agent that remembers what an engineering team decided, what it as
 
 [Hindsight](https://github.com/vectorize-io/hindsight) is the memory layer for both engines. Every decision, outcome, incident and fix is retained into a per-team Hindsight memory bank; every recommendation is built from Hindsight recall and reflect, and links back to the memories it came from.
 
-> The data in this repository is synthetic: two fictional teams (payments, platform) with 27 decisions and 13 incidents, written to contain realistic patterns. No claim here describes a real company.
+> The data in this repository is synthetic: two fictional teams (payments, platform) with 30 decisions and 16 incidents, written to contain realistic patterns. No claim here describes a real company.
 
 ![NEXUS overview](docs/img/overview.png)
 
@@ -110,7 +110,7 @@ cd backend
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env        # fill HINDSIGHT_URL, HINDSIGHT_API_KEY (Cloud), GROQ_API_KEY
-python -m app.seed --reset  # creates both banks and retains 67 memories
+python -m app.seed --reset  # creates both banks and retains the seeded history
 uvicorn app.main:app --reload --port 8000
 ```
 Open http://localhost:8000/docs for the API. `GET /health` must say `"memory_mode": "hindsight"` and `"llm_mode": "groq"`.

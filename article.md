@@ -114,4 +114,4 @@ To check that memory improves predictions rather than just decorating them, I re
 
 If you want to try this pattern yourself, start with the [Hindsight documentation](https://hindsight.vectorize.io/) and the [Hindsight GitHub repository](https://github.com/vectorize-io/hindsight). Vectorize also has a good primer on [what agent memory is and why it differs from RAG](https://vectorize.io/what-is-agent-memory). My biggest takeaway: the most valuable thing an engineering agent can remember isn't what worked. It's what only *looked* like it worked.
 
-*NEXUS is open source: [GitHub link to your repo here].*
+*NEXUS is open source: [github.com/Divyashree4757/NEXUS](https://github.com/Divyashree4757/NEXUS). Built with help from Code.in.*
