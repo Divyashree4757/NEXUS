@@ -579,3 +579,13 @@ def github_pr(body: PRIn):
 def slack_command(text: str = Form(...), channel_name: str = Form("payments")):
     team = channel_name if channel_name in config.TEAMS else config.TEAMS[0]
     return integrations.slack_response(team, text)
+
+
+# Single-service deploy: when the built frontend is present, serve it from the same origin.
+# Mounted last so every API route above takes precedence (the UI uses hash routing).
+import os as _os
+from fastapi.staticfiles import StaticFiles as _StaticFiles
+
+_static = _os.environ.get("NEXUS_STATIC_DIR", _os.path.join(_os.path.dirname(__file__), "..", "static"))
+if _os.path.isdir(_static):
+    app.mount("/", _StaticFiles(directory=_static, html=True), name="ui")

@@ -4,7 +4,7 @@ import type {
   Lesson, Memory, MemoryOp, Overview, PremortemReport, ProjectRow, ServiceRow,
 } from '@/types'
 
-export const API_BASE: string = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+export const API_BASE: string = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'  // empty string = same origin (single-service deploy)
 
 export class ApiError extends Error {
   constructor(message: string, public status?: number) { super(message) }
